@@ -6,6 +6,8 @@ export interface Requirement {
 	requiredStatus: RequiredStatus;
 }
 
+export type Regimen = 'TRIMESTRAL' | 'SEMESTRAL' | 'ANUAL';
+
 export type Subject = {
 	id: number;
 	disabled?: boolean;
@@ -13,13 +15,12 @@ export type Subject = {
 	semester?: number;
 	name: string;
 	oldName?: string;
-	regimen: 'TRIMESTRAL' | 'SEMESTRAL' | 'ANUAL';
+	regimen: Regimen;
 	modalidad: string;
 	horas_lectivas: number;
 	horas_IP: number;
 	horas_TAE: number;
 	horas_TTE: number;
-	credits: number;
 	status: Status;
 	requiredToEnroll: Requirement[];
 	requiredToApprove: Requirement[];

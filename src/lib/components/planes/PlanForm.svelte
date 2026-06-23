@@ -1,24 +1,31 @@
 <script lang="ts">
-	import type { Plan, Subject, Requirement, Status } from '$lib/types';
+	import type { Plan, Subject } from '$lib/types';
+	import { generateId, savePlan } from '$lib/stores/planesStore.svelte';
 	import SubjectForm from './SubjectForm.svelte';
-	import { generateId } from '$lib/stores/planesStore.svelte';
+	import Edit from '$lib/icons/Edit.svelte';
+	import Delete from '$lib/icons/Delete.svelte';
+	import Save from '$lib/icons/Save.svelte';
 
-	export let plan: Plan | null = null;
-	export let onSave: (plan: Plan) => void;
-	export let onCancel: () => void;
+	let {
+		plan,
+		onSave,
+		onCancel
+	}: {
+		plan: Plan | null;
+		onSave: () => void;
+		onCancel: () => void;
+	} = $props();
 
 	let formData = $state<Plan>({
 		id: plan?.id || generateId(),
 		name: plan?.name || '',
 		description: plan?.description || '',
 		year: plan?.year || new Date().getFullYear(),
-		subjects: plan?.subjects ? JSON.parse(JSON.stringify(plan.subjects)) : [],
-		levelRules: plan?.levelRules || []
+		subjects: plan?.subjects ? JSON.parse(JSON.stringify(plan.subjects)) : []
 	});
 
 	let showSubjectForm = $state(false);
-	let editingSubjectIndex = $state<number | null>(null);
-	let selectedSubject: Subject | null = $state(null);
+	let editingIndex = $state<number | null>(null);
 
 	function addSubject() {
 		const newSubject: Subject = {
@@ -33,31 +40,27 @@
 			horas_IP: 75,
 			horas_TAE: 100,
 			horas_TTE: 175,
-			credits: 7,
 			status: 'normal',
 			requiredToEnroll: [],
 			requiredToApprove: []
 		};
 		formData.subjects = [...formData.subjects, newSubject];
-		editingSubjectIndex = formData.subjects.length - 1;
-		selectedSubject = newSubject;
+		editingIndex = formData.subjects.length - 1;
 		showSubjectForm = true;
 	}
 
 	function editSubject(index: number) {
-		editingSubjectIndex = index;
-		selectedSubject = JSON.parse(JSON.stringify(formData.subjects[index]));
+		editingIndex = index;
 		showSubjectForm = true;
 	}
 
 	function saveSubject(subject: Subject) {
-		if (editingSubjectIndex !== null) {
-			formData.subjects[editingSubjectIndex] = subject;
-			formData.subjects = [...formData.subjects];
+		if (editingIndex !== null) {
+			formData.subjects[editingIndex] = subject;
+			formData.subjects = [...formData.subjects]; // Trigger reactivity
 		}
 		showSubjectForm = false;
-		editingSubjectIndex = null;
-		selectedSubject = null;
+		editingIndex = null;
 	}
 
 	function deleteSubject(index: number) {
@@ -67,12 +70,11 @@
 	}
 
 	function cancelSubjectForm() {
-		if (editingSubjectIndex !== null && !formData.subjects[editingSubjectIndex]?.name) {
-			formData.subjects = formData.subjects.filter((_, i) => i !== editingSubjectIndex);
+		if (editingIndex !== null && !formData.subjects[editingIndex]?.name) {
+			formData.subjects = formData.subjects.filter((_, i) => i !== editingIndex);
 		}
 		showSubjectForm = false;
-		editingSubjectIndex = null;
-		selectedSubject = null;
+		editingIndex = null;
 	}
 
 	function submitForm() {
@@ -84,107 +86,103 @@
 			alert('Debe agregar al menos una materia');
 			return;
 		}
-		onSave(formData);
+		savePlan(formData);
+		onSave();
 	}
 </script>
 
 <div class="space-y-6">
 	<div class="grid grid-cols-1 md:grid-cols-2 gap-4">
-		<div class="form-control">
-			<label class="label">
-				<span class="label-text font-semibold">Nombre del Plan *</span>
+		<div>
+			<label class="form-control w-full">
+				<span class="label-text font-medium">Nombre del Plan *</span>
+				<input
+					type="text"
+					bind:value={formData.name}
+					placeholder="Ej: Plan 2025 - Diseño Industrial"
+					class="input input-bordered w-full"
+				/>
 			</label>
-			<input
-				type="text"
-				bind:value={formData.name}
-				placeholder="Ej: Plan 2025 - Diseño Industrial"
-				class="input input-bordered w-full"
-			/>
 		</div>
 
-		<div class="form-control">
-			<label class="label">
-				<span class="label-text font-semibold">Año</span>
+		<div>
+			<label class="form-control w-full">
+				<span class="label-text font-medium">Año</span>
+				<input
+					class="input input-bordered w-full remove-arrow"
+					type="number"
+					bind:value={formData.year}
+				/>
 			</label>
-			<input type="number" bind:value={formData.year} class="input input-bordered w-full" />
 		</div>
 	</div>
 
-	<div class="form-control">
-		<label class="label">
-			<span class="label-text font-semibold">Descripción</span>
+	<div>
+		<label class="form-control w-full">
+			<span class="label-text font-medium">Descripción</span>
+			<textarea
+				bind:value={formData.description}
+				placeholder="Descripción del plan (opcional)"
+				class="textarea textarea-bordered w-full"
+				rows="2"></textarea>
 		</label>
-		<textarea
-			bind:value={formData.description}
-			placeholder="Descripción del plan (opcional)"
-			class="textarea textarea-bordered w-full"
-			rows="2"></textarea>
 	</div>
 
 	<div class="divider">Materias</div>
 
 	<div class="flex justify-between items-center">
-		<span class="text-sm text-gray-500">{formData.subjects.length} materias</span>
-		<button class="btn btn-faud btn-sm" onclick={addSubject}>
-			<i class="fas fa-plus mr-2"></i> Agregar Materia
-		</button>
+		<span class="text-sm">{formData.subjects.length} materias</span>
+		<button class="btn btn-primary btn-sm" onclick={addSubject}> + Agregar Materia </button>
 	</div>
 
-	{#if showSubjectForm && selectedSubject}
-		<div class="bg-gray-50 p-4 rounded-lg border border-gray-200">
-			<SubjectForm
-				subject={selectedSubject}
-				allSubjects={formData.subjects}
-				onSave={saveSubject}
-				onCancel={cancelSubjectForm}
-			/>
+	{#if showSubjectForm}
+		<div class="card bg-base-200">
+			<div class="card-body">
+				<SubjectForm
+					subject={formData.subjects[editingIndex || 0]}
+					allSubjects={formData.subjects}
+					onSave={saveSubject}
+					onCancel={cancelSubjectForm}
+				/>
+			</div>
 		</div>
 	{/if}
 
 	<div class="space-y-2 max-h-96 overflow-y-auto">
-		{#each formData.subjects as subject, index}
-			<div
-				class="bg-white p-3 rounded-lg border border-gray-200 flex justify-between items-start hover:bg-gray-50 transition-colors"
-			>
+		{#each formData.subjects as subject, index (index)}
+			<div class="flex items-center justify-between p-3 bg-base-200 rounded-lg">
 				<div class="flex-1">
-					<div class="font-semibold text-sm">
-						{subject.name || 'Materia sin nombre'}
-					</div>
-					<div class="text-xs text-gray-500">
-						Año {subject.year} · {subject.semester ? `Semestre ${subject.semester}` : 'Anual'} ·
-						{subject.credits} créditos
-					</div>
-					<div class="text-xs text-gray-500">
-						Correlativas: {subject.requiredToEnroll.length} para cursar · {subject.requiredToApprove
-							.length} para aprobar
+					<div class="font-medium">{subject.name || 'Materia sin nombre'}</div>
+					<div class="text-sm text-gray-500">
+						{subject.year}° Año ·
+						{#if subject.semester}
+							{subject.semester}° Semestre
+						{:else}
+							Anual
+						{/if}
+						{#if subject.requiredToEnroll.length > 0}
+							· 📚 {subject.requiredToEnroll.length} correlativas
+						{/if}
 					</div>
 				</div>
-				<div class="flex gap-2 ml-2">
-					<button class="btn btn-ghost btn-xs" onclick={() => editSubject(index)} title="Editar">
-						<i class="fas fa-edit"></i>
+				<div class="flex gap-2">
+					<button class="btn btn-ghost btn-sm" onclick={() => editSubject(index)}>
+						<Edit />
 					</button>
-					<button
-						class="btn btn-ghost btn-xs text-red-500"
-						onclick={() => deleteSubject(index)}
-						title="Eliminar"
-					>
-						<i class="fas fa-trash"></i>
+					<button class="btn btn-ghost btn-sm text-error" onclick={() => deleteSubject(index)}>
+						<Delete />
 					</button>
 				</div>
 			</div>
 		{:else}
 			<div class="text-center py-8 text-gray-400">
-				<i class="fas fa-book text-4xl mb-2"></i>
 				<p>No hay materias agregadas</p>
-				<p class="text-xs">Haz clic en "Agregar Materia" para comenzar</p>
 			</div>
 		{/each}
 	</div>
 
-	<div class="flex justify-end gap-3 pt-4 border-t border-gray-200">
+	<div class="flex justify-end gap-3 pt-4 border-t">
 		<button class="btn btn-ghost" onclick={onCancel}> Cancelar </button>
-		<button class="btn btn-faud" onclick={submitForm}>
-			<i class="fas fa-save mr-2"></i> Guardar Plan
-		</button>
+		<button class="btn btn-primary" onclick={submitForm}><Save /> Guardar Plan</button>
 	</div>
 </div>

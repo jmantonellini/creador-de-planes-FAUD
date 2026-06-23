@@ -1,29 +1,4 @@
-type Status = 'normal' | 'regular' | 'approved';
-type RequiredStatus = 'regular' | 'approved';
-
-export interface Requirement {
-	subjectId: number;
-	requiredStatus: RequiredStatus; // "regular" or "approved"
-}
-
-export type Subject = {
-	id: number;
-	disabled?: boolean;
-	year: number;
-	semester?: number;
-	name: string;
-	oldName?: string;
-	regimen: string;
-	modalidad: string;
-	horas_lectivas: number;
-	horas_IP: number;
-	horas_TAE: number;
-	horas_TTE: number;
-	credits: number;
-	status: Status;
-	requiredToEnroll: Requirement[];
-	requiredToApprove: Requirement[];
-};
+import type { Subject } from '$lib/types';
 
 export const plansByYear: Record<number, number> = {
 	1: 2025,
@@ -46,7 +21,6 @@ export const subjectsByYear: Record<number, Subject[]> = {
 			horas_IP: 80,
 			horas_TAE: 70,
 			horas_TTE: 150,
-			credits: 6,
 			status: 'normal',
 			requiredToEnroll: [],
 			requiredToApprove: []
@@ -63,7 +37,6 @@ export const subjectsByYear: Record<number, Subject[]> = {
 			horas_IP: 50,
 			horas_TAE: 75,
 			horas_TTE: 125,
-			credits: 5,
 			status: 'normal',
 			requiredToEnroll: [],
 			requiredToApprove: []
@@ -81,7 +54,6 @@ export const subjectsByYear: Record<number, Subject[]> = {
 			horas_IP: 50,
 			horas_TAE: 100,
 			horas_TTE: 150,
-			credits: 6,
 			status: 'normal',
 			requiredToEnroll: [],
 			requiredToApprove: []
@@ -98,7 +70,6 @@ export const subjectsByYear: Record<number, Subject[]> = {
 			horas_IP: 100,
 			horas_TAE: 125,
 			horas_TTE: 225,
-			credits: 9,
 			status: 'normal',
 			requiredToEnroll: [{ subjectId: 1, requiredStatus: 'regular' }],
 			requiredToApprove: [{ subjectId: 1, requiredStatus: 'approved' }]
@@ -115,7 +86,6 @@ export const subjectsByYear: Record<number, Subject[]> = {
 			horas_IP: 100,
 			horas_TAE: 125,
 			horas_TTE: 225,
-			credits: 9,
 			status: 'normal',
 			requiredToEnroll: [{ subjectId: 2, requiredStatus: 'regular' }],
 			requiredToApprove: [{ subjectId: 2, requiredStatus: 'approved' }]
@@ -132,7 +102,6 @@ export const subjectsByYear: Record<number, Subject[]> = {
 			horas_IP: 100,
 			horas_TAE: 125,
 			horas_TTE: 225,
-			credits: 9,
 			status: 'normal',
 			requiredToEnroll: [{ subjectId: 3, requiredStatus: 'regular' }],
 			requiredToApprove: [{ subjectId: 3, requiredStatus: 'approved' }]
@@ -149,7 +118,6 @@ export const subjectsByYear: Record<number, Subject[]> = {
 			horas_IP: 160,
 			horas_TAE: 240,
 			horas_TTE: 400,
-			credits: 16,
 			status: 'normal',
 			requiredToEnroll: [
 				{ subjectId: 1, requiredStatus: 'regular' },
@@ -165,7 +133,7 @@ export const subjectsByYear: Record<number, Subject[]> = {
 		{
 			id: 8,
 			year: 2,
-			semester: 3,
+			semester: 1,
 			name: 'SISTEMAS DE REPRESENTACIÓN',
 			oldName: 'SISTEMAS DE REPRESENTACIÓN II',
 			regimen: 'SEMESTRAL',
@@ -174,7 +142,6 @@ export const subjectsByYear: Record<number, Subject[]> = {
 			horas_IP: 75,
 			horas_TAE: 100,
 			horas_TTE: 175,
-			credits: 7,
 			status: 'normal',
 			requiredToEnroll: [{ subjectId: 1, requiredStatus: 'regular' }],
 			requiredToApprove: [
@@ -186,7 +153,7 @@ export const subjectsByYear: Record<number, Subject[]> = {
 		{
 			id: 9,
 			year: 2,
-			semester: 3,
+			semester: 1,
 			name: 'MORFOLOGÍA',
 			oldName: 'MORFOLOGÍA II',
 			regimen: 'SEMESTRAL',
@@ -195,7 +162,6 @@ export const subjectsByYear: Record<number, Subject[]> = {
 			horas_IP: 75,
 			horas_TAE: 100,
 			horas_TTE: 175,
-			credits: 7,
 			status: 'normal',
 			requiredToEnroll: [{ subjectId: 4, requiredStatus: 'approved' }],
 			requiredToApprove: [
@@ -208,7 +174,7 @@ export const subjectsByYear: Record<number, Subject[]> = {
 		{
 			id: 10,
 			year: 2,
-			semester: 3,
+			semester: 1,
 			name: 'TEORÍA ARGUMENTATIVA DEL PROYECTO',
 			oldName: 'CIENCIAS HUMANAS',
 			regimen: 'SEMESTRAL',
@@ -217,7 +183,6 @@ export const subjectsByYear: Record<number, Subject[]> = {
 			horas_IP: 75,
 			horas_TAE: 50,
 			horas_TTE: 125,
-			credits: 5,
 			status: 'normal',
 			requiredToEnroll: [{ subjectId: 3, requiredStatus: 'approved' }],
 			requiredToApprove: [
@@ -229,7 +194,7 @@ export const subjectsByYear: Record<number, Subject[]> = {
 		{
 			id: 11,
 			year: 2,
-			semester: 3,
+			semester: 1,
 			name: 'INTRODUCCIÓN AL DISEÑO DE PRODUCTO',
 			oldName: 'DISEÑO INDUSTRIAL I',
 			regimen: 'SEMESTRAL',
@@ -238,7 +203,6 @@ export const subjectsByYear: Record<number, Subject[]> = {
 			horas_IP: 120,
 			horas_TAE: 130,
 			horas_TTE: 250,
-			credits: 10,
 			status: 'normal',
 			requiredToEnroll: [
 				{ subjectId: 1, requiredStatus: 'regular' },
@@ -254,7 +218,7 @@ export const subjectsByYear: Record<number, Subject[]> = {
 		{
 			id: 12,
 			year: 2,
-			semester: 4,
+			semester: 2,
 			name: 'REPRESENTACIÓN AVANZADA',
 			oldName: 'INFORMÁTICA',
 			regimen: 'SEMESTRAL',
@@ -263,7 +227,6 @@ export const subjectsByYear: Record<number, Subject[]> = {
 			horas_IP: 75,
 			horas_TAE: 100,
 			horas_TTE: 175,
-			credits: 7,
 			status: 'normal',
 			requiredToEnroll: [
 				{ subjectId: 1, requiredStatus: 'approved' },
@@ -281,7 +244,7 @@ export const subjectsByYear: Record<number, Subject[]> = {
 		{
 			id: 13,
 			year: 2,
-			semester: 4,
+			semester: 2,
 			name: 'ERGONOMÍA Y DISEÑO',
 			oldName: 'ERGONOMÍA I',
 			regimen: 'SEMESTRAL',
@@ -290,7 +253,6 @@ export const subjectsByYear: Record<number, Subject[]> = {
 			horas_IP: 75,
 			horas_TAE: 100,
 			horas_TTE: 175,
-			credits: 7,
 			status: 'normal',
 			requiredToEnroll: [{ subjectId: 7, requiredStatus: 'approved' }],
 			requiredToApprove: [{ subjectId: 7, requiredStatus: 'approved' }]
@@ -298,7 +260,7 @@ export const subjectsByYear: Record<number, Subject[]> = {
 		{
 			id: 14,
 			year: 2,
-			semester: 4,
+			semester: 2,
 			name: 'MATERIALIZACIÓN, ESTANDARIZACIÓN Y DETALLE',
 			oldName: 'TECONOLOGÍA I',
 			regimen: 'SEMESTRAL',
@@ -307,7 +269,6 @@ export const subjectsByYear: Record<number, Subject[]> = {
 			horas_IP: 75,
 			horas_TAE: 100,
 			horas_TTE: 175,
-			credits: 7,
 			status: 'normal',
 			requiredToEnroll: [
 				{ subjectId: 5, requiredStatus: 'regular' },
@@ -321,7 +282,7 @@ export const subjectsByYear: Record<number, Subject[]> = {
 		{
 			id: 15,
 			year: 2,
-			semester: 4,
+			semester: 2,
 			name: 'DISEÑO DE PRODUCTO',
 			oldName: 'DISEÑO INDUSTRIAL I',
 			regimen: 'SEMESTRAL',
@@ -330,7 +291,6 @@ export const subjectsByYear: Record<number, Subject[]> = {
 			horas_IP: 120,
 			horas_TAE: 130,
 			horas_TTE: 250,
-			credits: 10,
 			status: 'normal',
 			requiredToEnroll: [
 				{ subjectId: 8, requiredStatus: 'regular' },
@@ -346,7 +306,7 @@ export const subjectsByYear: Record<number, Subject[]> = {
 		{
 			id: 16,
 			year: 3,
-			semester: 5,
+			semester: 1,
 			name: 'ERGONOMÍA Y PROCESOS',
 			oldName: 'ERGONOMÍA I',
 			regimen: 'SEMESTRAL',
@@ -355,7 +315,6 @@ export const subjectsByYear: Record<number, Subject[]> = {
 			horas_IP: 75,
 			horas_TAE: 125,
 			horas_TTE: 200,
-			credits: 8,
 			status: 'normal',
 			requiredToEnroll: [{ subjectId: 13, requiredStatus: 'regular' }],
 			requiredToApprove: [{ subjectId: 13, requiredStatus: 'approved' }]
@@ -363,7 +322,7 @@ export const subjectsByYear: Record<number, Subject[]> = {
 		{
 			id: 17,
 			year: 3,
-			semester: 5,
+			semester: 1,
 			name: 'SEMIÓTICA DE LA FORMA',
 			oldName: 'MORFOLOGÍA III',
 			regimen: 'SEMESTRAL',
@@ -372,7 +331,6 @@ export const subjectsByYear: Record<number, Subject[]> = {
 			horas_IP: 75,
 			horas_TAE: 125,
 			horas_TTE: 200,
-			credits: 8,
 			status: 'normal',
 			requiredToEnroll: [
 				{ subjectId: 8, requiredStatus: 'regular' },
@@ -386,7 +344,7 @@ export const subjectsByYear: Record<number, Subject[]> = {
 		{
 			id: 18,
 			year: 3,
-			semester: 5,
+			semester: 1,
 			name: 'INVESTIGACIÓN Y CRÍTICA DEL PROYECTO',
 			oldName: 'TEORÍA DEL DISEÑO',
 			regimen: 'SEMESTRAL',
@@ -395,7 +353,6 @@ export const subjectsByYear: Record<number, Subject[]> = {
 			horas_IP: 75,
 			horas_TAE: 50,
 			horas_TTE: 125,
-			credits: 5,
 			status: 'normal',
 			requiredToEnroll: [
 				{ subjectId: 10, requiredStatus: 'regular' },
@@ -409,7 +366,7 @@ export const subjectsByYear: Record<number, Subject[]> = {
 		{
 			id: 19,
 			year: 3,
-			semester: 5,
+			semester: 1,
 			name: 'DISEÑO DE PRODUCTO SISTÉMICO',
 			oldName: 'DISEÑO INDUSTRIAL II',
 			regimen: 'SEMESTRAL',
@@ -418,7 +375,6 @@ export const subjectsByYear: Record<number, Subject[]> = {
 			horas_IP: 120,
 			horas_TAE: 130,
 			horas_TTE: 250,
-			credits: 10,
 			status: 'normal',
 			requiredToEnroll: [{ subjectId: 15, requiredStatus: 'approved' }],
 			requiredToApprove: [{ subjectId: 15, requiredStatus: 'approved' }]
@@ -426,7 +382,7 @@ export const subjectsByYear: Record<number, Subject[]> = {
 		{
 			id: 20,
 			year: 3,
-			semester: 6,
+			semester: 2,
 			name: 'GESTIÓN Y MARKETING',
 			oldName: 'COMERCIALIZACIÓN DE PRODUCTOS I',
 			regimen: 'SEMESTRAL',
@@ -435,7 +391,6 @@ export const subjectsByYear: Record<number, Subject[]> = {
 			horas_IP: 75,
 			horas_TAE: 100,
 			horas_TTE: 175,
-			credits: 7,
 			status: 'normal',
 			requiredToEnroll: [{ subjectId: 11, requiredStatus: 'approved' }],
 			requiredToApprove: [{ subjectId: 11, requiredStatus: 'approved' }]
@@ -443,7 +398,7 @@ export const subjectsByYear: Record<number, Subject[]> = {
 		{
 			id: 21,
 			year: 3,
-			semester: 6,
+			semester: 2,
 			name: 'TECNOLOGÍAS DE SISTEMAS COMPLEJOS',
 			oldName: 'TECNOLOGÍA II',
 			regimen: 'SEMESTRAL',
@@ -452,7 +407,6 @@ export const subjectsByYear: Record<number, Subject[]> = {
 			horas_IP: 75,
 			horas_TAE: 125,
 			horas_TTE: 200,
-			credits: 8,
 			status: 'normal',
 			requiredToEnroll: [{ subjectId: 14, requiredStatus: 'regular' }],
 			requiredToApprove: [{ subjectId: 14, requiredStatus: 'approved' }]
@@ -468,7 +422,6 @@ export const subjectsByYear: Record<number, Subject[]> = {
 			horas_IP: 120,
 			horas_TAE: 130,
 			horas_TTE: 250,
-			credits: 10,
 			status: 'normal',
 			requiredToEnroll: [{ subjectId: 19, requiredStatus: 'approved' }],
 			requiredToApprove: [
@@ -482,7 +435,7 @@ export const subjectsByYear: Record<number, Subject[]> = {
 		{
 			id: 23,
 			year: 3,
-			semester: 6,
+			semester: 2,
 			name: 'ELECTIVA I',
 			regimen: 'SEMESTRAL',
 			modalidad: 'PRESENCIAL',
@@ -490,7 +443,6 @@ export const subjectsByYear: Record<number, Subject[]> = {
 			horas_IP: 45,
 			horas_TAE: 55,
 			horas_TTE: 100,
-			credits: 4,
 			status: 'normal',
 			requiredToEnroll: [],
 			requiredToApprove: []
@@ -507,7 +459,6 @@ export const subjectsByYear: Record<number, Subject[]> = {
 	//   horas_IP: 120,
 	//   horas_TAE: 55,
 	//   horas_TTE: 175,
-	//   credits: 7,
 	//   status: "normal",
 	//   requiredToEnroll: [{subjectId: 19, requiredStatus: 'approved'}],
 	//   requiredToApprove: []
@@ -522,7 +473,6 @@ export const subjectsByYear: Record<number, Subject[]> = {
 	//   horas_IP: 120,
 	//   horas_TAE: 55,
 	//   horas_TTE: 175,
-	//   credits: 7,
 	//   status: "normal",
 	//   requiredToEnroll: [{subjectId: 19, requiredStatus: 'approved'}],
 	//   requiredToApprove: []
@@ -531,7 +481,7 @@ export const subjectsByYear: Record<number, Subject[]> = {
 		{
 			id: 24,
 			year: 4,
-			semester: 7,
+			semester: 1,
 			name: 'LEGISLACIÓN EN DISEÑO INDUSTRIAL',
 			oldName: 'LEGISLACIÓN',
 			regimen: 'SEMESTRAL',
@@ -540,7 +490,6 @@ export const subjectsByYear: Record<number, Subject[]> = {
 			horas_IP: 75,
 			horas_TAE: 125,
 			horas_TTE: 200,
-			credits: 8,
 			status: 'normal',
 			requiredToEnroll: [{ subjectId: 15, requiredStatus: 'approved' }],
 			requiredToApprove: [{ subjectId: 15, requiredStatus: 'approved' }]
@@ -548,7 +497,7 @@ export const subjectsByYear: Record<number, Subject[]> = {
 		{
 			id: 25,
 			year: 4,
-			semester: 7,
+			semester: 1,
 			name: 'GESTIÓN TECNOLÓGICA ESTRATÉGICA',
 			oldName: 'TECONOLOGÍA III',
 			regimen: 'SEMESTRAL',
@@ -557,7 +506,6 @@ export const subjectsByYear: Record<number, Subject[]> = {
 			horas_IP: 75,
 			horas_TAE: 150,
 			horas_TTE: 225,
-			credits: 9,
 			status: 'normal',
 			requiredToEnroll: [
 				{ subjectId: 15, requiredStatus: 'approved' },
@@ -578,7 +526,6 @@ export const subjectsByYear: Record<number, Subject[]> = {
 			horas_IP: 45,
 			horas_TAE: 55,
 			horas_TTE: 100,
-			credits: 4,
 			status: 'normal',
 			requiredToEnroll: [],
 			requiredToApprove: []
@@ -594,7 +541,6 @@ export const subjectsByYear: Record<number, Subject[]> = {
 			horas_IP: 240,
 			horas_TAE: 560,
 			horas_TTE: 800,
-			credits: 32,
 			status: 'normal',
 			requiredToEnroll: [
 				{ subjectId: 22, requiredStatus: 'approved' },

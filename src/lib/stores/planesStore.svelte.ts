@@ -1,57 +1,78 @@
+// src/lib/stores/planesStore.svelte.ts
 import { localStore } from './localStore.svelte';
+import type { Plan, Subject } from '../types';
 import { defaultSubjects } from '../subjects';
-import type { Subject, Plan } from '../types';
 
-export const customPlans = localStore<Plan[]>('custom_plans', []);
-
-export const activePlanId = localStore<string | null>('active_plan_id', null);
-
-export function getPlanSubjects(planId: string | null): Subject[] {
-	if (!planId) {
-		return Object.values(defaultSubjects).flat();
-	}
-
-	const plan = customPlans.value.find((p) => p.id === planId);
-	return plan?.subjects ?? [];
-}
-
-export function getPlan(planId: string | null): Plan | null {
-	if (!planId) return null;
-	return customPlans.value.find((p) => p.id === planId) ?? null;
-}
-
-export function savePlan(plan: Plan) {
-	const index = customPlans.value.findIndex((p) => p.id === plan.id);
-	if (index >= 0) {
-		customPlans.value[index] = plan;
-	} else {
-		customPlans.value = [...customPlans.value, plan];
-	}
-	customPlans.value = [...customPlans.value];
-}
-
-export function deletePlan(planId: string) {
-	customPlans.value = customPlans.value.filter((p) => p.id !== planId);
-	if (activePlanId.value === planId) {
-		activePlanId.value = null;
-	}
-}
+export const plans = localStore<Plan[]>('plans', []);
+export const activePlanId = localStore<string | null>('activePlanId', null);
+export const simSubjects = localStore<Record<number, Subject[]>>('simSubjects', {});
 
 export function generateId(): string {
 	return Date.now().toString(36) + Math.random().toString(36).substring(2, 7);
 }
 
-// Función para obtener todas las materias de un plan en formato subjectsByYear
+export function getPlan(id: string | null): Plan | null {
+	if (!id) return null;
+	return plans.value.find((p) => p.id === id) || null;
+}
+
+export function savePlan(plan: Plan) {
+	const currentPlans = plans.value || [];
+	const index = currentPlans.findIndex((p) => p.id === plan.id);
+
+	let newPlans: Plan[];
+	if (index >= 0) {
+		newPlans = [...currentPlans];
+		newPlans[index] = plan;
+	} else {
+		newPlans = [...currentPlans, plan];
+	}
+
+	plans.value = newPlans;
+	console.log('Plan guardado:', plan.name);
+}
+
+export function deletePlan(id: string) {
+	plans.value = (plans.value || []).filter((p) => p.id !== id);
+	if (activePlanId.value === id) {
+		activePlanId.value = null;
+	}
+}
+
 export function getSubjectsByYear(planId: string | null): Record<number, Subject[]> {
-	const subjects = getPlanSubjects(planId);
+	if (!planId) {
+		return simSubjects.value || {};
+	}
+
+	const plan = getPlan(planId);
+	if (!plan) return {};
+
 	const result: Record<number, Subject[]> = {};
-
-	subjects.forEach((subject) => {
-		if (!result[subject.year]) {
-			result[subject.year] = [];
-		}
-		result[subject.year].push(subject);
+	plan.subjects.forEach((s) => {
+		if (!result[s.year]) result[s.year] = [];
+		result[s.year].push(s);
 	});
-
 	return result;
+}
+
+export function createDefaultPlan() {
+	const defaultPlan: Plan = {
+		id: 'default',
+		name: 'Plan 2025 - Diseño Industrial',
+		description: 'Plan de estudios 2025',
+		year: 2025,
+		subjects: Object.values(defaultSubjects).flat()
+	};
+	return defaultPlan;
+}
+
+export function initializeDefaultPlan() {
+	if (plans.value.length === 0) {
+		const defaultPlan = createDefaultPlan();
+		savePlan(defaultPlan);
+		activePlanId.value = defaultPlan.id;
+		simSubjects.value = defaultSubjects;
+		return defaultPlan;
+	}
+	return null;
 }
