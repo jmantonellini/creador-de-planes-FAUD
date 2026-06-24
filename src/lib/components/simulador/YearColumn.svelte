@@ -26,10 +26,6 @@
 	const semestre1 = $derived(subjects.filter((s) => s.semester === 1));
 	const semestre2 = $derived(subjects.filter((s) => s.semester === 2));
 
-	$inspect(anuales).with(() => console.log('ANUALES', anuales));
-	$inspect(semestre1).with(() => console.log('SEM 1', semestre1));
-	$inspect(semestre2).with(() => console.log('SEM 2', semestre2));
-
 	// Determinar el número máximo de filas
 	const maxRows = $derived(Math.max(semestre1.length, semestre2.length));
 </script>
@@ -46,8 +42,8 @@
 		</div>
 	</div>
 
-	<div class="card-body p-4">
-		<table class="table border-spacing-2 table-sm">
+	<div class="card-body p-0">
+		<table class="gap-2 border-spacing-y-2 table-xs table">
 			<thead>
 				<tr>
 					<th class="w-1/2 text-xs font-semibold text-gray-400 uppercase tracking-wider">
@@ -67,8 +63,8 @@
 
 				<!-- Materias por semestre -->
 				{#each Array(maxRows), index (index)}
-					<tr>
-						<td class="p-1 align-top">
+					<tr class="table-row">
+						<td class="pr-2 align-top">
 							{#if index < semestre1.length}
 								{@const subject = semestre1[index]}
 								{@const { disabled, reason } = isDisabled(subject, allSubjects)}
@@ -80,7 +76,7 @@
 								/>
 							{/if}
 						</td>
-						<td class="p-1 align-top">
+						<td class="pl-2 align-top">
 							{#if index < semestre2.length}
 								{@const subject = semestre2[index]}
 								{@const { disabled, reason } = isDisabled(subject, allSubjects)}
@@ -100,7 +96,7 @@
 					{#each anuales as subject (subject.id)}
 						{@const { disabled, reason } = isDisabled(subject, allSubjects)}
 						<tr>
-							<td colspan="2" class="p-1 align-top">
+							<td colspan="2" class="p-2 align-top">
 								<SubjectCard
 									{subject}
 									{disabled}

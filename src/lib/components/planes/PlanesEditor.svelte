@@ -1,7 +1,8 @@
 <script lang="ts">
 	import Delete from '$lib/icons/Delete.svelte';
+	import Duplicate from '$lib/icons/Duplicate.svelte';
 	import Edit from '$lib/icons/Edit.svelte';
-	import { plans, deletePlan } from '$lib/stores/planesStore.svelte';
+	import { plans, deletePlan, savePlan, generateId } from '$lib/stores/planesStore.svelte';
 	import type { Plan } from '$lib/types';
 	import PlanForm from './PlanForm.svelte';
 
@@ -11,6 +12,13 @@
 	function editPlan(plan: Plan) {
 		editingPlan = JSON.parse(JSON.stringify(plan));
 		showForm = true;
+	}
+
+	function duplicatePlan(plan: Plan) {
+		const newPlan = JSON.parse(JSON.stringify(plan));
+		newPlan.id = generateId();
+		newPlan.name += ' (Copia)';
+		savePlan(newPlan);
 	}
 </script>
 
@@ -59,21 +67,22 @@
 								<p class="text-sm mt-2">{plan.description}</p>
 							{/if}
 						</div>
-						<div class="flex gap-2">
-							<button class="btn btn-ghost btn-sm" onclick={() => editPlan(plan)}><Edit /></button>
-							<button
-								class="btn btn-ghost btn-sm text-error"
-								onclick={() => {
-									if (confirm('¿Eliminar este plan?')) {
-										deletePlan(plan.id);
-									}
-								}}
-							>
-								<Delete />
-							</button>
-						</div>
 					</div>
 					<div class="card-actions justify-end mt-4">
+						<button class="btn btn-ghost btn-sm" onclick={() => editPlan(plan)}><Edit /></button>
+						<button class="btn btn-ghost btn-sm" onclick={() => duplicatePlan(plan)}
+							><Duplicate /></button
+						>
+						<button
+							class="btn btn-ghost btn-sm text-error"
+							onclick={() => {
+								if (confirm('¿Eliminar este plan?')) {
+									deletePlan(plan.id);
+								}
+							}}
+						>
+							<Delete />
+						</button>
 						<a href="/?plan={plan.id}" class="btn btn-secondary btn-outline btn-sm">Simular</a>
 					</div>
 				</div>

@@ -15,6 +15,7 @@ export type Subject = {
 	semester?: number;
 	name: string;
 	oldName?: string;
+	creditos?: number;
 	regimen: Regimen;
 	modalidad: string;
 	horas_lectivas: number;

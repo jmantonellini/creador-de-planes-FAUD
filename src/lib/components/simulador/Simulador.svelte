@@ -15,7 +15,11 @@
 
 	let selectedPlanId = $state<string | null>(null);
 	let currentSubjects = $state<Record<number, Subject[]>>({});
-	let showInfo = $state(false);
+	let maxYear = $derived(
+		Object.keys(currentSubjects).length > 0
+			? Math.max(...Object.keys(currentSubjects).map(Number))
+			: 0
+	);
 
 	// Cargar plan al inicio
 	$effect(() => {
@@ -87,25 +91,6 @@
 	}
 
 	function isDisabled(subject: Subject, allSubjects: Subject[]) {
-		const byLevel = (lvl: number) => allSubjects.filter((s) => s.year === lvl);
-		const libres = (subs: Subject[]) => subs.filter((s) => s.status === 'normal');
-		const aproved = (subs: Subject[]) => subs.filter((s) => s.status === 'approved');
-
-		if (subject.year === 1) return { disabled: false };
-
-		if (subject.year === 2) {
-			const level1 = byLevel(1);
-			const firstSem = level1.filter((s) => s.semester === 1);
-			const secondSem = level1.filter((s) => s.semester === 2);
-
-			if (aproved(firstSem).length < firstSem.length - 1) {
-				return { disabled: true, reason: 'Máx. 1 materia libre del 1º semestre' };
-			}
-			if (libres(secondSem).length > 2) {
-				return { disabled: true, reason: 'Máx. 2 materias libres del 2º semestre' };
-			}
-		}
-
 		if (
 			subject.status === 'normal' &&
 			!subject.requiredToEnroll.every((r) => hasRequiredStatus(allSubjects, r))
@@ -161,7 +146,7 @@
 	}
 </script>
 
-<div id="print-area" class="space-y-6 flex flex-col items-center">
+<div class="space-y-6 flex flex-col items-center">
 	<!-- Selector de plan -->
 	<div class="card bg-base-100 w-fit shadow-md">
 		<div class="card-body">
@@ -182,89 +167,57 @@
 				</fieldset>
 
 				<div class="flex gap-2">
-					<button class="btn btn-primary" onclick={() => approveYear(4)}>Aprobar Todo</button>
+					<button class="btn btn-primary" onclick={() => approveYear(maxYear)}>Aprobar Todo</button>
 					<button class="btn btn-ghost" onclick={resetAll}> 🔄 Reiniciar </button>
 					<button class="btn btn-ghost" onclick={exportImage}> 🖨️ Exportar </button>
-					<button class="btn btn-ghost" onclick={() => (showInfo = !showInfo)}> ℹ️ Info </button>
 				</div>
 			</div>
 		</div>
 	</div>
-
-	<!-- Info de normas -->
-	{#if showInfo}
-		<dialog class="modal">
-			<div>
-				<svg
-					xmlns="http://www.w3.org/2000/svg"
-					class="stroke-current shrink-0 h-6 w-6"
-					fill="none"
-					viewBox="0 0 24 24"
-				>
-					<path
-						stroke-linecap="round"
-						stroke-linejoin="round"
-						stroke-width="2"
-						d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"
-					/>
-				</svg>
-				<div>
-					<h3 class="font-bold">Condiciones de acceso al Nivel</h3>
-					<ul class="list-disc pl-5 space-y-1 text-sm mt-1">
-						<li><strong>Nivel I:</strong> Sin restricciones</li>
-						<li>
-							<strong>Nivel II:</strong> Máx 1 libre en primer semestre, máx 2 libres en segundo
-						</li>
-						<li><strong>Nivel III:</strong> Aprobadas todas del Nivel 1 menos 2 regulares</li>
-						<li><strong>Nivel IV:</strong> Niveles I y II aprobados</li>
-					</ul>
-				</div>
-			</div>
-			<button class="btn btn-sm" onclick={() => (showInfo = false)}>Cerrar</button>
-		</dialog>
-	{/if}
 
 	<!-- Leyenda -->
-	<div class="flex flex-wrap gap-4 items-center justify-center text-sm">
-		<div class="flex items-center gap-2">
-			<div class="w-4 h-4 rounded bg-blue-200 border-2 border-blue-500"></div>
-			<span>Habilitada</span>
-		</div>
-		<div class="flex items-center gap-2">
-			<div class="w-4 h-4 rounded bg-red-200 border-2 border-red-500"></div>
-			<span>Inhabilitada</span>
-		</div>
-		<div class="flex items-center gap-2">
-			<div class="w-4 h-4 rounded bg-yellow-200 border-2 border-yellow-500"></div>
-			<span>Regular</span>
-		</div>
-		<div class="flex items-center gap-2">
-			<div class="w-4 h-4 rounded bg-green-200 border-2 border-green-500"></div>
-			<span>Aprobada</span>
-		</div>
-	</div>
-
-	<!-- Columnas -->
-	{#if Object.keys(currentSubjects).length > 0}
-		<div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
-			{#each Object.entries(currentSubjects) as [year, list] (year)}
-				{@const allSubjects = Object.values(currentSubjects).flat()}
-				<YearColumn
-					year={+year}
-					subjects={list}
-					{allSubjects}
-					onToggle={toggleStatus}
-					{isDisabled}
-					onApproveYear={() => approveYear(+year)}
-				/>
-			{/each}
-		</div>
-	{:else}
-		<div class="card bg-base-100 shadow-md">
-			<div class="card-body text-center py-12">
-				<p class="text-gray-500">No hay materias cargadas para este plan.</p>
-				<a href="/planes" class="btn btn-primary btn-sm w-fit mx-auto">Crear Plan</a>
+	<div id="print-area" class="gap-6 flex flex-col items-center">
+		<div class="flex flex-wrap gap-4 items-center justify-center text-sm">
+			<div class="flex items-center gap-2">
+				<div class="w-4 h-4 rounded bg-blue-200 border-2 border-blue-500"></div>
+				<span>Habilitada</span>
+			</div>
+			<div class="flex items-center gap-2">
+				<div class="w-4 h-4 rounded bg-red-200 border-2 border-red-500"></div>
+				<span>Inhabilitada</span>
+			</div>
+			<div class="flex items-center gap-2">
+				<div class="w-4 h-4 rounded bg-yellow-200 border-2 border-yellow-500"></div>
+				<span>Regular</span>
+			</div>
+			<div class="flex items-center gap-2">
+				<div class="w-4 h-4 rounded bg-green-200 border-2 border-green-500"></div>
+				<span>Aprobada</span>
 			</div>
 		</div>
-	{/if}
+
+		<!-- Columnas -->
+		{#if Object.keys(currentSubjects).length > 0}
+			<div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-5 gap-4">
+				{#each Object.entries(currentSubjects) as [year, list] (year)}
+					{@const allSubjects = Object.values(currentSubjects).flat()}
+					<YearColumn
+						year={+year}
+						subjects={list}
+						{allSubjects}
+						onToggle={toggleStatus}
+						{isDisabled}
+						onApproveYear={() => approveYear(+year)}
+					/>
+				{/each}
+			</div>
+		{:else}
+			<div class="card bg-base-100 shadow-md">
+				<div class="card-body text-center py-12">
+					<p class="text-gray-500">No hay materias cargadas para este plan.</p>
+					<a href="/planes" class="btn btn-primary btn-sm w-fit mx-auto">Crear Plan</a>
+				</div>
+			</div>
+		{/if}
+	</div>
 </div>

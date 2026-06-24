@@ -26,7 +26,7 @@
 </script>
 
 <button
-	class="w-full text-left p-2 rounded-md border-2 {bgColor} transition-all text-xs disabled:opacity-60 z-10 tooltip-botom"
+	class="w-full text-left p-1 overflow-hidden rounded-md border-2 {bgColor} transition-all text-[10px] disabled:opacity-60 z-10 tooltip-botom"
 	data-tip={reason}
 	class:cursor-pointer={!disabled}
 	class:tooltip={disabled && reason}
