@@ -1,17 +1,30 @@
 <script lang="ts">
 	import Delete from '$lib/icons/Delete.svelte';
+	import Download from '$lib/icons/Download.svelte';
 	import Duplicate from '$lib/icons/Duplicate.svelte';
 	import Edit from '$lib/icons/Edit.svelte';
+	import Upload from '$lib/icons/Upload.svelte';
 	import { plans, deletePlan, savePlan, generateId } from '$lib/stores/planesStore.svelte';
 	import type { Plan } from '$lib/types';
 	import PlanForm from './PlanForm.svelte';
 
 	let showForm = $state(false);
 	let editingPlan: Plan | null = $state(null);
+	let showModal = $state(false);
 
 	function editPlan(plan: Plan) {
 		editingPlan = JSON.parse(JSON.stringify(plan));
 		showForm = true;
+	}
+
+	function downloadPlan(plan: Plan) {
+		const dataStr = 'data:text/json;charset=utf-8,' + encodeURIComponent(JSON.stringify(plan));
+		const downloadAnchorNode = document.createElement('a');
+		downloadAnchorNode.setAttribute('href', dataStr);
+		downloadAnchorNode.setAttribute('download', `${plan.name}.json`);
+		document.body.appendChild(downloadAnchorNode);
+		downloadAnchorNode.click();
+		downloadAnchorNode.remove();
 	}
 
 	function duplicatePlan(plan: Plan) {
@@ -25,15 +38,26 @@
 <div class="space-y-6">
 	<div class="flex justify-between items-center">
 		<h2 class="text-2xl font-bold">Planes de Estudio</h2>
-		<button
-			class="btn btn-primary"
-			onclick={() => {
-				editingPlan = null;
-				showForm = true;
-			}}
-		>
-			+ Nuevo Plan
-		</button>
+		<div class="flex gap-4">
+			<button
+				title="Importar plan"
+				class="btn btn-primary btn-outline"
+				onclick={() => {
+					showModal = true;
+				}}
+			>
+				<Upload /></button
+			>
+			<button
+				class="btn btn-primary"
+				onclick={() => {
+					editingPlan = null;
+					showForm = true;
+				}}
+			>
+				+ Crear
+			</button>
+		</div>
 	</div>
 
 	{#if showForm}
@@ -69,11 +93,21 @@
 						</div>
 					</div>
 					<div class="card-actions justify-end mt-4">
-						<button class="btn btn-ghost btn-sm" onclick={() => editPlan(plan)}><Edit /></button>
-						<button class="btn btn-ghost btn-sm" onclick={() => duplicatePlan(plan)}
-							><Duplicate /></button
+						<button title="Editar plan" class="btn btn-ghost btn-sm" onclick={() => editPlan(plan)}
+							><Edit /></button
 						>
 						<button
+							title="Duplicar plan"
+							class="btn btn-ghost btn-sm"
+							onclick={() => duplicatePlan(plan)}><Duplicate /></button
+						>
+						<button
+							title="Descargar plan"
+							class="btn btn-ghost btn-sm"
+							onclick={() => downloadPlan(plan)}><Download /></button
+						>
+						<button
+							title="Eliminar plan"
 							class="btn btn-ghost btn-sm text-error"
 							onclick={() => {
 								if (confirm('¿Eliminar este plan?')) {
@@ -83,7 +117,11 @@
 						>
 							<Delete />
 						</button>
-						<a href="/?plan={plan.id}" class="btn btn-secondary btn-outline btn-sm">Simular</a>
+						<a
+							title="Simular plan"
+							href="/?plan={plan.id}"
+							class="btn btn-secondary btn-outline btn-sm">Simular</a
+						>
 					</div>
 				</div>
 			</div>
@@ -105,3 +143,37 @@
 		{/each}
 	</div>
 </div>
+
+<dialog open={showModal} class="modal">
+	<form method="dialog" class="modal-box">
+		<h3 class="font-bold text-lg">Cargar Plan de Estudio</h3>
+		<p class="py-4">Selecciona un archivo JSON para cargar un plan de estudio.</p>
+		<input
+			type="file"
+			class="file-input file-input-bordered w-full"
+			accept=".json"
+			onchange={(e) => {
+				const file = e.target?.files?.[0];
+				if (file) {
+					const reader = new FileReader();
+					reader.onload = (event) => {
+						try {
+							const plan: Plan = JSON.parse(event.target?.result as string);
+							if (!plan.id) {
+								plan.id = generateId();
+							}
+							savePlan(plan);
+							showModal = false;
+						} catch (error) {
+							alert('Error al cargar el plan: ' + error);
+						}
+					};
+					reader.readAsText(file);
+				}
+			}}
+		/>
+		<div class="modal-action">
+			<button class="btn btn-primary">Cerrar</button>
+		</div>
+	</form>
+</dialog>

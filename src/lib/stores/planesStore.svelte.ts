@@ -1,7 +1,6 @@
-// src/lib/stores/planesStore.svelte.ts
-import { localStore } from './localStore.svelte';
 import type { Plan, Subject } from '../types';
 import { defaultSubjects } from '../subjects';
+import { localStore } from './localStore.svelte';
 
 export const plans = localStore<Plan[]>('plans', []);
 export const activePlanId = localStore<string | null>('activePlanId', null);
@@ -29,7 +28,6 @@ export function savePlan(plan: Plan) {
 	}
 
 	plans.value = newPlans;
-	console.log('Plan guardado:', plan.name);
 }
 
 export function deletePlan(id: string) {
@@ -58,9 +56,9 @@ export function getSubjectsByYear(planId: string | null): Record<number, Subject
 export function createDefaultPlan() {
 	const defaultPlan: Plan = {
 		id: 'default',
-		name: 'Plan 2026 - Arquitectura',
-		description: 'Plan de estudios 2026',
-		year: 2026,
+		name: 'Plan 2025 - Diseño Industrial',
+		description: 'Plan de estudios 2025',
+		year: 2025,
 		subjects: Object.values(defaultSubjects).flat()
 	};
 	return defaultPlan;
