@@ -99,7 +99,7 @@
 				<input
 					type="text"
 					bind:value={formData.name}
-					placeholder="Ej: Plan 2025 - Diseño Industrial"
+					placeholder="Ej: Plan 2026 - Arquitectura"
 					class="input input-bordered w-full"
 				/>
 			</label>

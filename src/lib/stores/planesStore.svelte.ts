@@ -56,9 +56,9 @@ export function getSubjectsByYear(planId: string | null): Record<number, Subject
 export function createDefaultPlan() {
 	const defaultPlan: Plan = {
 		id: 'default',
-		name: 'Plan 2025 - Diseño Industrial',
-		description: 'Plan de estudios 2025',
-		year: 2025,
+		name: 'Plan 2026 - Arquitectura',
+		description: 'Plan de estudios 2026 para la carrera de Arquitectura',
+		year: 2026,
 		subjects: Object.values(defaultSubjects).flat()
 	};
 	return defaultPlan;
