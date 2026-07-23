@@ -4,7 +4,6 @@ import { localStore } from './localStore.svelte';
 
 export const plans = localStore<Plan[]>('plans', []);
 export const activePlanId = localStore<string | null>('activePlanId', null);
-export const simSubjects = localStore<Record<number, Subject[]>>('simSubjects', {});
 
 export function generateId(): string {
 	return Date.now().toString(36) + Math.random().toString(36).substring(2, 7);
@@ -39,7 +38,7 @@ export function deletePlan(id: string) {
 
 export function getSubjectsByYear(planId: string | null): Record<number, Subject[]> {
 	if (!planId) {
-		return simSubjects.value || {};
+		return {};
 	}
 
 	const plan = getPlan(planId);
@@ -69,8 +68,23 @@ export function initializeDefaultPlan() {
 		const defaultPlan = createDefaultPlan();
 		savePlan(defaultPlan);
 		activePlanId.value = defaultPlan.id;
-		simSubjects.value = defaultSubjects;
 		return defaultPlan;
 	}
 	return null;
+}
+
+export function cleanSimSubjects(planId: string | null = activePlanId.value) {
+	const plan = getPlan(planId);
+	if (!plan) return null;
+
+	const resetPlan: Plan = {
+		...plan,
+		subjects: plan.subjects.map((subject) => ({
+			...subject,
+			status: 'normal'
+		}))
+	};
+
+	savePlan(resetPlan);
+	return resetPlan;
 }

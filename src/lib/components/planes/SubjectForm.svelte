@@ -232,7 +232,12 @@
 					{#each formData.requiredToApprove as req (req.subjectId)}
 						<div class="flex justify-between items-center text-sm bg-base-100 p-2 rounded">
 							<span>{getSubjectName(req.subjectId)}</span>
-							<span class="badge">{req.requiredStatus === 'regular' ? 'Regular' : 'Aprobada'}</span>
+							<span
+								class="badge"
+								class:badge-success={req.requiredStatus === 'approved'}
+								class:badge-warning={req.requiredStatus === 'regular'}
+								>{req.requiredStatus === 'regular' ? 'Regular' : 'Aprobada'}</span
+							>
 							<button
 								class="btn btn-ghost btn-xs text-error"
 								onclick={() => removeRequirement('approve', req.subjectId)}

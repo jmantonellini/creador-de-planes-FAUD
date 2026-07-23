@@ -1,6 +1,6 @@
 const browser = typeof window !== 'undefined';
 
-const CURRENT_VERSION = '3.0'; // Incrementa cuando quieras resetear todos los datos
+const CURRENT_VERSION = '4.0'; // Incrementa cuando quieras resetear todos los datos
 
 function checkAndMigrateVersion() {
 	if (!browser) return;

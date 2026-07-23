@@ -3,83 +3,97 @@
 	import {
 		plans,
 		activePlanId,
-		simSubjects,
 		getPlan,
 		getSubjectsByYear,
 		savePlan,
-		createDefaultPlan
+		createDefaultPlan,
+		cleanSimSubjects
 	} from '$lib/stores/planesStore.svelte';
-	import type { Subject, Requirement } from '$lib/types';
+	import type { Subject, Requirement, Plan } from '$lib/types';
 	import YearColumn from './YearColumn.svelte';
-	import { defaultSubjects } from '$lib/subjects';
+	import { page } from '$app/state';
 
 	let selectedPlanId = $state<string | null>(null);
+	let planParam = $derived(page.url.searchParams.get('plan'));
 	let currentSubjects = $state<Record<number, Subject[]>>({});
+	let initialized = $state(false);
 	let maxYear = $derived(
 		Object.keys(currentSubjects).length > 0
 			? Math.max(...Object.keys(currentSubjects).map(Number))
 			: 0
 	);
 
-	// Cargar plan al inicio
+	// Cargar plan al inicio una sola vez desde la URL o el store
 	$effect(() => {
-		// Si hay un plan activo, cargarlo
-		if (activePlanId.value) {
-			const subjects = getSubjectsByYear(activePlanId.value);
-			currentSubjects = subjects;
-			selectedPlanId = activePlanId.value;
-		} else {
-			// Si no hay plan activo, usar simSubjects o crear default
-			if (Object.keys(simSubjects.value).length > 0) {
-				currentSubjects = simSubjects.value;
-			} else {
-				// Crear plan por defecto
-				const defaultPlan = createDefaultPlan();
-				savePlan(defaultPlan);
-				activePlanId.value = defaultPlan.id;
-				currentSubjects = defaultSubjects;
-				simSubjects.value = defaultSubjects;
-				selectedPlanId = defaultPlan.id;
-			}
-		}
+		if (initialized) return;
+
+		const initialPlanId = planParam ?? activePlanId.value ?? plans.value[0]?.id ?? null;
+		loadPlan(initialPlanId, { syncUrl: false });
+		initialized = true;
 	});
 
-	function loadPlan(planId: string | null) {
+	function updatePlanUrl(planId: string | null) {
+		if (typeof window === 'undefined') return;
+
+		const url = new URL(window.location.href);
 		if (planId) {
-			const plan = getPlan(planId);
-			if (plan) {
-				const subjects = getSubjectsByYear(planId);
-				currentSubjects = subjects;
-				simSubjects.value = subjects;
-				activePlanId.value = planId;
-				selectedPlanId = planId;
-			}
+			url.searchParams.set('plan', planId);
 		} else {
-			// Cargar plan por defecto
-			const defaultPlan = createDefaultPlan();
-			savePlan(defaultPlan);
-			const subjects = getSubjectsByYear(defaultPlan.id);
-			currentSubjects = subjects;
-			simSubjects.value = subjects;
-			activePlanId.value = defaultPlan.id;
-			selectedPlanId = defaultPlan.id;
+			url.searchParams.delete('plan');
 		}
+
+		window.history.replaceState({}, '', `${url.pathname}${url.search}`);
+	}
+
+	function loadPlan(planId: string | null, options: { syncUrl?: boolean } = {}) {
+		const { syncUrl = true } = options;
+		const plan = getPlan(planId);
+		if (plan) {
+			currentSubjects = getSubjectsByYear(plan.id);
+			activePlanId.value = plan.id;
+			selectedPlanId = plan.id;
+			if (syncUrl) updatePlanUrl(plan.id);
+			return;
+		}
+
+		const fallbackPlan = getPlan(activePlanId.value) || plans.value[0];
+		if (fallbackPlan) {
+			currentSubjects = getSubjectsByYear(fallbackPlan.id);
+			activePlanId.value = fallbackPlan.id;
+			selectedPlanId = fallbackPlan.id;
+			if (syncUrl) updatePlanUrl(fallbackPlan.id);
+			return;
+		}
+
+		const defaultPlan = createDefaultPlan();
+		savePlan(defaultPlan);
+		currentSubjects = getSubjectsByYear(defaultPlan.id);
+		activePlanId.value = defaultPlan.id;
+		selectedPlanId = defaultPlan.id;
+		if (syncUrl) updatePlanUrl(defaultPlan.id);
 	}
 
 	function toggleStatus(year: number, id: number) {
-		const list = currentSubjects[year] ?? [];
-		const subject = list.find((s) => s.id === id);
+		const plan = getPlan(selectedPlanId);
+		if (!plan) return;
+
+		const subject = plan.subjects.find((s) => s.id === id);
 		if (!subject) return;
 
-		subject.status =
+		const nextStatus: Subject['status'] =
 			subject.status === 'normal'
 				? 'regular'
 				: subject.status === 'regular'
 					? 'approved'
 					: 'normal';
 
-		currentSubjects = { ...currentSubjects };
-		simSubjects.value = currentSubjects;
+		const updatedPlan: Plan = {
+			...plan,
+			subjects: plan.subjects.map((s) => (s.id === id ? { ...s, status: nextStatus } : s))
+		};
+
+		savePlan(updatedPlan);
+		currentSubjects = getSubjectsByYear(selectedPlanId);
 	}
 
 	function hasRequiredStatus(subjects: Subject[], requirement: Requirement): boolean {
@@ -109,21 +123,25 @@
 	}
 
 	function resetAll() {
-		const defaultPlan = createDefaultPlan();
-		savePlan(defaultPlan);
-		currentSubjects = defaultSubjects;
-		simSubjects.value = defaultSubjects;
-		activePlanId.value = defaultPlan.id;
-		selectedPlanId = defaultPlan.id;
+		const updatedPlan = cleanSimSubjects(selectedPlanId);
+		if (updatedPlan) {
+			currentSubjects = getSubjectsByYear(selectedPlanId);
+		}
 	}
 
 	function approveYear(year: number) {
-		for (let y = 1; y <= year; y++) {
-			const list = currentSubjects[y] ?? [];
-			list.forEach((s) => (s.status = 'approved'));
-		}
-		currentSubjects = { ...currentSubjects };
-		simSubjects.value = currentSubjects;
+		const plan = getPlan(selectedPlanId);
+		if (!plan) return;
+
+		const updatedPlan: Plan = {
+			...plan,
+			subjects: plan.subjects.map((subject) =>
+				subject.year <= year ? { ...subject, status: 'approved' } : subject
+			)
+		};
+
+		savePlan(updatedPlan);
+		currentSubjects = getSubjectsByYear(selectedPlanId);
 	}
 
 	async function exportImage() {
