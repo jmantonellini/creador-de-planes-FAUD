@@ -1,10 +1,10 @@
 import type { Subject } from '$lib/types';
 
 export const plansByYear: Record<number, number> = {
-	1: 2025,
-	2: 2025,
-	3: 2025,
-	4: 2025
+	1: 2026,
+	2: 2026,
+	3: 2026,
+	4: 2026
 };
 
 export const subjectsDiseñoByYear: Record<number, Subject[]> = {
