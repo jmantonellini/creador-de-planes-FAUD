@@ -33,6 +33,34 @@
 		newPlan.name += ' (Copia)';
 		savePlan(newPlan);
 	}
+
+	function importPlan(file: File) {
+		const reader = new FileReader();
+		reader.onload = (event) => {
+			try {
+				const plan: Plan = JSON.parse(event.target?.result as string);
+
+				// Validar IDs únicos
+				const ids = plan.subjects.map((s) => s.id);
+				const duplicateIds = ids.filter((id, index) => ids.indexOf(id) !== index);
+				if (duplicateIds.length > 0) {
+					alert(
+						`Error: IDs duplicados encontrados: ${duplicateIds.join(', ')}. Por favor, corrige el archivo JSON.`
+					);
+					return;
+				}
+
+				if (!plan.id) {
+					plan.id = generateId();
+				}
+				savePlan(plan);
+				showModal = false;
+			} catch (error) {
+				alert('Error al cargar el plan: ' + error);
+			}
+		};
+		reader.readAsText(file);
+	}
 </script>
 
 <div class="space-y-6">
@@ -155,20 +183,7 @@
 			onchange={(e) => {
 				const file = e.target?.files?.[0];
 				if (file) {
-					const reader = new FileReader();
-					reader.onload = (event) => {
-						try {
-							const plan: Plan = JSON.parse(event.target?.result as string);
-							if (!plan.id) {
-								plan.id = generateId();
-							}
-							savePlan(plan);
-							showModal = false;
-						} catch (error) {
-							alert('Error al cargar el plan: ' + error);
-						}
-					};
-					reader.readAsText(file);
+					importPlan(file);
 				}
 			}}
 		/>

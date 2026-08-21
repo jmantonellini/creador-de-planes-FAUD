@@ -86,6 +86,24 @@
 			alert('Debe agregar al menos una materia');
 			return;
 		}
+
+		const ids = formData.subjects.map((s) => s.id);
+		const duplicateIds = ids.filter((id, index) => ids.indexOf(id) !== index);
+		if (duplicateIds.length > 0) {
+			alert(`Error: Hay materias con IDs duplicados: ${duplicateIds.join(', ')}`);
+			return;
+		}
+
+		const allSubjectIds = new Set(formData.subjects.map((s) => s.id));
+		for (const subject of formData.subjects) {
+			for (const req of [...subject.requiredToEnroll, ...subject.requiredToApprove]) {
+				if (!allSubjectIds.has(req.subjectId)) {
+					alert(`La materia "${subject.name}" referencia a un ID inexistente: ${req.subjectId}`);
+					return;
+				}
+			}
+		}
+
 		savePlan(formData);
 		onSave();
 	}
